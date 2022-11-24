@@ -4,26 +4,38 @@ import {
   PropsWithChildren,
   useEffect,
   useState,
+  Dispatch,
+  SetStateAction,
 } from "react";
+import { paths } from "../helpers/paths";
 import { request } from "../helpers/request";
-import { TQuestion } from "../interfaces";
+import { IQuestion, IQuizAnswer } from "../interfaces";
 
-const DEFAULT_QUIZ_STATE: TQuestion[] = [
-  { id: 1, question: "", answers: [] },
-  { id: 2, question: "", answers: [] },
-  { id: 3, question: "", answers: [] },
-  { id: 4, question: "", answers: [] },
-  { id: 5, question: "", answers: [] },
-];
+interface IQuizContext {
+  questions: IQuestion[];
+  answers: IQuizAnswer[];
+  setAnswers: Dispatch<SetStateAction<IQuizAnswer[]>>;
+}
 
-export const QuizContext = createContext<TQuestion[]>([]);
+export const QuizContext = createContext<IQuizContext>({
+  questions: [],
+  answers: [],
+  setAnswers: () => {},
+});
 
 export const QuizProvider = ({ children }: PropsWithChildren): ReactElement => {
-  const [questions, setQuestions] = useState<TQuestion[]>(DEFAULT_QUIZ_STATE);
+  const [questions, setQuestions] = useState<IQuestion[]>([]);
+  const [answers, setAnswers] = useState<IQuizAnswer[]>([]);
+
   const fetchQuestions = async () => {
     try {
-      const { data } = await request.get<TQuestion[]>("/questions");
+      const { data } = await request.get<IQuestion[]>(paths.questions);
+      const defaultAnswers: IQuizAnswer[] = data.map((question) => ({
+        id: question.id,
+        answer: null,
+      }));
       setQuestions(data);
+      setAnswers(defaultAnswers);
     } catch (err) {
       // Here we can use toast to show error to user
       console.error(err);
@@ -35,6 +47,8 @@ export const QuizProvider = ({ children }: PropsWithChildren): ReactElement => {
   }, []);
 
   return (
-    <QuizContext.Provider value={questions}>{children}</QuizContext.Provider>
+    <QuizContext.Provider value={{ questions, answers, setAnswers }}>
+      {children}
+    </QuizContext.Provider>
   );
 };
