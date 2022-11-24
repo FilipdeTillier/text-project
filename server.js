@@ -4,7 +4,7 @@ const {
 const jsonServer = require("json-server");
 const bodyParser = require("body-parser");
 
-const { PORT = 3001, DB_PATH = "db.json" } = process.env;
+const { BACKEND_PORT = 3001, DB_PATH = "db.json" } = process.env;
 
 const server = jsonServer.create();
 const router = jsonServer.router(DB_PATH);
@@ -19,6 +19,16 @@ const areAnswersFormatIsInvalid = (answers) => {
   // In that case, library is to huge for this small piece of code.
   return answers.some((answer) => !(answer.id && answer.answer));
 };
+
+server.get("/questions", (_req, res) => {
+  const { questions = [] } = router.db.getState();
+  const mappedQuestions = questions.map(({ id, question, answers }) => ({
+    id,
+    question,
+    answers,
+  }));
+  return res.json(mappedQuestions).status(OK);
+});
 
 server.post("/check-results", (req, res) => {
   const answers = req.body;
@@ -60,6 +70,6 @@ server.post("/check-results", (req, res) => {
 
 server.use(router);
 
-server.listen(PORT, () => {
-  console.log(`JSON Server is running on port ${PORT}`);
+server.listen(BACKEND_PORT, () => {
+  console.log(`JSON Server is running on port ${BACKEND_PORT}`);
 });

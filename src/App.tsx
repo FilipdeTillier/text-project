@@ -1,9 +1,15 @@
-import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
+import { Quiz } from "./containers/Quiz/Quiz";
+import { QuizProvider } from "./providers/QuizProvider";
 
 function App() {
-  return <div className="App"></div>;
+  return (
+    <div className="App">
+      <QuizProvider>
+        <Quiz />
+      </QuizProvider>
+    </div>
+  );
 }
 
 export default App;
