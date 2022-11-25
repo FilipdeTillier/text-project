@@ -20,6 +20,15 @@ const areAnswersFormatIsInvalid = (answers) => {
   return answers.some((answer) => !(answer.id && answer.answer));
 };
 
+server.get("/questions/answers", (_req, res) => {
+  const { questions = [] } = router.db.getState();
+  const mappedQuestions = questions.map(({ id, correctValue }) => ({
+    id,
+    correctValue,
+  }));
+  return res.json(mappedQuestions).status(OK);
+});
+
 server.get("/questions", (_req, res) => {
   const { questions = [] } = router.db.getState();
   const mappedQuestions = questions.map(({ id, question, answers }) => ({
